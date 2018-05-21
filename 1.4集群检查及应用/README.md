@@ -19,11 +19,10 @@
 
  几个配置启动参数的目录
 
-```
 /etc/mesos-master/
 /etc/mesos-slave/
 /etc/marathon/conf/ 
-```
+
 在这些目录分别用来配置mesos-master，mesos-slave，marathon的启动参数。以参数名为文件名，参数值为文件内容即可。 
 
 
@@ -37,7 +36,7 @@
 [root@marathon-lb01 ~]#docker pull docker.io/mesosphere/marathon-lb
 ```
 
-- 通过marathon部署marathon-lb(haproxy),应用描述 json结构内容如下: 
+- 通过marathon部署marathon-lb(haproxy),应用描述json结构内容如下: 
 
 ```
 [root@marathon-lb01 ~]# cat marathon-lb.json
@@ -52,7 +51,7 @@
       [
         "hostname",
         "LIKE",
-        "ops-cd-lb0[1-2].sysadmin.xinguangnet.com"
+        "marathon-master0[0-9].ops.com"
       ]
     ],
     "container": {
@@ -67,11 +66,11 @@
     "args": [
       "sse",
       "--marathon",
-      "http://ops-cd-mesos01:8080",
+      "http://marathon-master01:8080",
       "--marathon",
-      "http://ops-cd-mesos02:8080",
+      "http://marathon-master02:8080",
       "--marathon",
-      "http://ops-cd-mesos03:8080",
+      "http://marathon-master03:8080",
       "--group",
       "external"
     ],
@@ -81,11 +80,27 @@
 
 ```
 
+重要参数说明:
+
+SSE模式, marathon-lb连接到marathon的事件endpoint，app状态改变时收到通知,同时修改负载均衡
+
+--group 参数是说明这个lb负载均衡的设备名称或者表示,后面再启动应用docker的时候会指定服务注册到那个lb设备的 
+
+可以使用命令行或者web界面进行启动部署应用 
+
+```
+curl -i -H 'Content-Type: application/json' http://http://marathon-master01.ops.com:8080/v2/apps -d@marathon-lb.json
+```
+
+- marathon lb监控
+
+查看9090端口，HAProxy统计
+
+http://marathon-lb01.ops.com:9090/haproxy?stats
+
+http://marathon-lb01.ops.com:9090/_haproxy_getconfig
 
 
-
-
-
-
+阿里云环境可以将marathonlb的节点接入到slb，然后将域名解析到slb上即可。
 
 
