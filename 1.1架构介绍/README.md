@@ -3,40 +3,53 @@
 | V1.0  | 2018-04-17  | 创建  |  开源方案   |    初始版本  |
 
 
-## Openshift  Origin v3.6 架构图
+# 系统功能概述
 
-OpenShift 是一款容器应用平台，它将 Docker 和 Kubernetes 技术带入企业。
+- mesos 介绍
 
- ![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/architecture_overview.png)
- 
-上图是openshift origin 总体架构图
+Apache Mesos能够在同样的集群机器上运行多种分布式系统类型，更加动态有效率低共享资源。
+提供失败侦测，任务发布，任务跟踪，任务监控，低层次资源管理和细粒度的资源共享，可以扩展伸缩到数千个节点。 
 
-![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/openshift_k8s.jpg)
+![image](https://github.com/jinyuchen724/marathon-mesos/raw/master/1.1架构介绍/mesos_arch.png)
 
-上图是 openshift 和 k8s 所在容器云平台的关系
+![image](https://github.com/jinyuchen724/marathon-mesos/raw/master/1.1架构介绍/mesos_architecture.png)
 
-## 主服务和计算节点关系结构
+- Marathon 介绍
 
-![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/all_in_one.png)
+它是一个mesos框架，能够支持运行长服务，比如web应用等。
+是集群的分布式Init.d，能够原样运行任何Linux二进制发布版本，如Tomcat Play等等，可以集群的多进程管理。
+也是一种私有的Pass，实现服务的发现，为部署提供提供REST API服务，有授权和SSL、配置约束，通过HAProxy实现服务发现和负载平衡。 
 
-![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/master-node.jpg)
+![image](https://github.com/jinyuchen724/marathon-mesos/raw/master/1.1架构介绍/marathon_01.png)
 
-**主服务器(Masters)依赖于基于etcd的分布式目录， 主要用来提供配置共享和服务发现**
+这样，我们可以如同一台Linux主机一样管理数千台服务器，它们的对应原理如下图，
+使用Marathon类似Linux主机内的init Systemd等外壳管理，而Mesos则不只包含一个Linux核，
+可以调度数千台服务器的Linux核，实际是一个数据中心的内核： 
 
-**计算节点(Nodes) 主要用来作为PODS的宿主和运行容器**
+![image](https://github.com/jinyuchen724/marathon-mesos/raw/master/1.1架构介绍/marathon_02.png)
 
-## 整体应用概念介绍
+- chronos 介绍
 
-![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/openshift-app2.jpg)
+![image](https://github.com/jinyuchen724/marathon-mesos/raw/master/1.1架构介绍/chronos.jpg)
 
-![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/opensift_app.png)
+Chronos本质上是cron-on-mesos,这是一个用来运行基于容器定时任务的Mesos框架。 
 
-![image](https://github.com/jinyuchen724/openshift/raw/master/1.集群安装/1.1架构介绍/k8s_arch.jpg)
+# 应用/系统拓扑图
 
-上述应用架构图中， 概念来源于Kubernetes的概念， 需要明白以下主要的对象。
+![image](https://github.com/jinyuchen724/marathon-mesos/raw/master/1.1架构介绍/mesos_cluster.png)
 
-- 一个 **POD** 是一个Docker 容器的运行环境(如果需要共享本地的资源， 我们将在单独的POD中布署两种类别的容器)
-- 一个 **Service** 服务是一个入口(VIP)，抽象出一个均衡访问负载到一组相同的容器，理论上， 最少是一个服务对应一个架构层
-- 一个服务布署者(**Service Deployer**)或布署配置(**Deployment Config**)是一个对象， 用来描述基于触发器的容器的布署策略(比如，当docker仓库中有新版本的映象时， 重新布署)
-- 一个复制控制器(**Replication Controller**)是一个技术组件， 主要负责POD 的弹性。
-- 一个路由(**Route**)是用来暴露一个应用的入口(域名解析， 主机名或VIP)
+
+上图: 是mesos marathon 集群架构图
+
+整体架构采用MESOS+MARATHON+ZK 来保持高可用
+服务发现和负载均衡使用marathon-lb 来实现，可以使用docker运行,也可使用vm跑或者物理机运行,统一使用marathon来进行应用管理
+集群所有服务器配置统一使用saltstack进行配置管理
+发布系统(CD)和marathon api 进行交互执行容器部署和常规应用部署 
+
+
+
+
+
+
+
+
