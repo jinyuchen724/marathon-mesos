@@ -100,7 +100,60 @@ http://marathon-lb01.ops.com:9090/haproxy?stats
 
 http://marathon-lb01.ops.com:9090/_haproxy_getconfig
 
+内网环境将域名解析到lb上即可
+lb              IN A 172.16.2.104
+*.dev           IN CNAME lb
+*.qaif          IN CNAME lb
+*.qafc          IN CNAME lb
+*.qaxn          IN CNAME lb
+*.prod          IN CNAME lb
 
 阿里云环境可以将marathonlb的节点接入到slb，然后将域名解析到slb上即可。
+
+- 首先在后端服务器添加部署lb节点的服务器
+
+- 添加监听端口，然后将域名解析到slb上即可，对应的marathon上HAPROXY_0_VHOST填入对应的域名即可
+
+```
+{
+  "id": "/logio-server",
+  "cmd": "/home/logio/run.sh",
+  "cpus": 0.5,
+  "mem": 1024,
+  "disk": 0,
+  "instances": 1,
+  "constraints": [
+    [
+      "hostname",
+      "CLUSTER",
+      "marathon-slave01.ops.com"
+    ]
+  ],
+  "container": {
+    "type": "DOCKER",
+    "volumes": [],
+    "docker": {
+      "image": "logio-server",
+      "network": "HOST",
+      "portMappings": [],
+      "privileged": false,
+      "parameters": [],
+      "forcePullImage": false
+    }
+  },
+  "labels": {
+    "HAPROXY_GROUP": "external",
+    "HAPROXY_0_VHOST": "logtest.yiqiguang.com"
+  },
+  "portDefinitions": [
+    {
+      "port": 10004,
+      "protocol": "tcp",
+      "name": "default",
+      "labels": {}
+    }
+  ]
+}
+```
 
 
