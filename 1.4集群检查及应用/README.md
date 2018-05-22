@@ -92,6 +92,14 @@ SSE模式, marathon-lb连接到marathon的事件endpoint，app状态改变时收
 curl -i -H 'Content-Type: application/json' http://http://marathon-master01.ops.com:8080/v2/apps -d@marathon-lb.json
 ```
 
+查看、删除或重启应用
+
+```
+curl -X GET http://172.22.1.51:8080/v2/apps/logio-server
+curl -X DELETE http://172.22.1.51:8080/v2/apps/logio-server
+curl -i -H 'Content-Type: application/json' http://172.22.1.51:8080/v2/apps/logio-server/restart
+```
+
 - marathon lb监控
 
 查看9090端口，HAProxy统计
